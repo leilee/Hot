@@ -47,6 +47,10 @@ public class SensorViewController: NSViewController
             {
                 self.icon = NSImage( named: "TCXCTemplate" )
             }
+            else if self.name.lowercased().hasPrefix( "cpu" )
+            {
+                self.icon = NSImage( named: "TCXCTemplate" )
+            }
             
             else
             {

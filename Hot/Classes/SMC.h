@@ -107,5 +107,6 @@ SMCParamStruct;
 IOReturn SMCReadKey( uint32_t key, uint8_t * buf, IOByteCount * maxSize );
 IOReturn SMCCallFunction( uint32_t function, SMCParamStruct * input, SMCParamStruct * output );
 double   SMCGetCPUTemperature( void );
+double   SMCGetTemperature( uint32_t key );
 
 #endif /* SMC_H */

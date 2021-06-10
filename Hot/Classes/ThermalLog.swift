@@ -23,6 +23,74 @@
  ******************************************************************************/
 
 import Foundation
+import Cocoa
+
+let SMC_CPU_CORE_TEMP_NEW = "TC%@c"
+
+func gCPUPackageCount() -> Int {
+  var c: Int = 0
+  var l: size_t = MemoryLayout<Int>.size
+  sysctlbyname("hw.packages", &c, &l, nil, 0)
+  return c
+}
+
+func gCountPhisycalCores() -> Int {
+  var c: Int = 0
+  var l: size_t = MemoryLayout<Int>.size
+  sysctlbyname("machdep.cpu.core_count", &c, &l, nil, 0)
+  return c
+}
+
+func smcFormat(_ num: Int) -> String {
+  if num > 15 {
+    let GZ = (0..<20).map({Character(UnicodeScalar("G".unicodeScalars.first!.value + $0)!)})
+    for c in GZ {
+      let i = Int(c.unicodeScalars.first!.value) - 55
+      if i == num {
+        return "\(c)"
+      }
+    }
+  }
+  return String(format: "%.1X", num)
+}
+
+// Thanks to Airspeed Velocity for the great idea!
+// http://airspeedvelocity.net/2015/05/22/my-talk-at-swift-summit/
+public extension FourCharCode {
+  init(fromString str: String) {
+    precondition(str.count == 4)
+    
+    self = str.utf8.reduce(0) { sum, character in
+      return sum << 8 | UInt32(character)
+    }
+  }
+  
+  init(fromStaticString str: StaticString) {
+    precondition(str.utf8CodeUnitCount == 4)
+    
+    self = str.withUTF8Buffer { buffer in
+      // TODO: Broken up due to "Expression was too complex" error as of
+      //       Swift 4.
+      let byte0 = UInt32(buffer[0]) << 24
+      let byte1 = UInt32(buffer[1]) << 16
+      let byte2 = UInt32(buffer[2]) << 8
+      let byte3 = UInt32(buffer[3])
+      
+      return byte0 | byte1 | byte2 | byte3
+    }
+  }
+  
+  func toString() -> String {
+    return "\(String(describing: UnicodeScalar(self >> 24 & 0xff)!))\(String(describing: UnicodeScalar(self >> 16 & 0xff)!))\(String(describing: UnicodeScalar(self >> 8  & 0xff)!))\(String(describing: UnicodeScalar(self       & 0xff)!))"
+    /*
+    return String(describing: UnicodeScalar(self >> 24 & 0xff)!) +
+      String(describing: UnicodeScalar(self >> 16 & 0xff)!) +
+      String(describing: UnicodeScalar(self >> 8  & 0xff)!) +
+      String(describing: UnicodeScalar(self       & 0xff)!)*/
+  }
+}
+
+// MARK:
 
 public class ThermalLog: NSObject
 {
@@ -59,8 +127,16 @@ public class ThermalLog: NSObject
         
         #else
         
-        [ "TCXC" : SMCGetCPUTemperature() ]
+        let cpuCount = gCountPhisycalCores() * gCPUPackageCount()
+        var result = [ String : Double ]()
+        for i in 0..<cpuCount {
+            let key = String(format: SMC_CPU_CORE_TEMP_NEW, smcFormat(i))
+            let title = String(format: "CPU %02d", i)
+            result[title] = SMCGetTemperature(FourCharCode.init(fromString: key))
+        }
         
+        return result
+
         #endif
     }
     
@@ -76,10 +152,7 @@ public class ThermalLog: NSObject
             self.refreshing = true
             
             let sensors = self.readSensors()
-            let temp    = sensors.reduce( 0.0 )
-            {
-                r, v in v.value > r ? v.value : r
-            }
+            let temp    = SMCGetCPUTemperature()
             
             if temp > 1
             {

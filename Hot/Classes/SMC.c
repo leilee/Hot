@@ -150,7 +150,33 @@ double SMCGetCPUTemperature( void )
     
     size = sizeof( bytes );
     
-    if( SMCReadKey( 'TCXC', ( uint8_t * )&bytes, &size ) != kIOReturnSuccess || size != 2 )
+    if( SMCReadKey( 'TC0P', ( uint8_t * )&bytes, &size ) != kIOReturnSuccess || size != 2 )
+    {
+        return 0.0;
+    }
+    
+    {
+        double t1;
+        double t2;
+        
+        t1  = bytes[ 0 ] & 0x7F;
+        t2  = bytes[ 1 ];
+        t2 /= 1 << 8;
+        
+        return t1 + t2;
+    }
+}
+
+double SMCGetTemperature( uint32_t key )
+{
+    uint8_t     bytes[ 2 ];
+    IOByteCount size;
+    
+    memset( &bytes, 0, sizeof( bytes ) );
+    
+    size = sizeof( bytes );
+    
+    if( SMCReadKey( key, ( uint8_t * )&bytes, &size ) != kIOReturnSuccess || size != 2 )
     {
         return 0.0;
     }
