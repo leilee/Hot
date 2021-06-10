@@ -8,6 +8,8 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SensorViewController" customModule="Hot" customModuleProvider="target">
             <connections>
+                <outlet property="nameLabel" destination="nmS-91-jK5" id="LOD-c8-yUb"/>
+                <outlet property="valueLabel" destination="A6f-It-Ygp" id="deo-Az-FUk"/>
                 <outlet property="view" destination="c22-O7-iKe" id="USD-JN-7Yy"/>
             </connections>
         </customObject>

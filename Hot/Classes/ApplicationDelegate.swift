@@ -63,7 +63,7 @@ class ApplicationDelegate: NSObject, NSApplicationDelegate
         self.statusItem                        = NSStatusBar.system.statusItem( withLength: NSStatusItem.variableLength )
         self.statusItem?.button?.image         = NSImage( named: "StatusIconTemplate" )
         self.statusItem?.button?.imagePosition = .imageLeading
-        self.statusItem?.button?.font          = NSFont.monospacedDigitSystemFont( ofSize: NSFont.smallSystemFontSize, weight: .light )
+        self.statusItem?.button?.font          = NSFont.monospacedDigitSystemFont( ofSize: NSFont.smallSystemFontSize, weight: .regular )
         self.statusItem?.menu                  = self.menu
         
         let infoViewController             = InfoViewController()

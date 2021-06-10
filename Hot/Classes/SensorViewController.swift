@@ -26,6 +26,9 @@ import Cocoa
 
 public class SensorViewController: NSViewController
 {
+    @IBOutlet weak var nameLabel: NSTextField!
+    @IBOutlet weak var valueLabel: NSTextField!
+    
     @objc private dynamic var icon  = NSImage( named: "Unknown" )
     @objc private dynamic var label = "Unknown:"
     @objc public  dynamic var value = 0
@@ -62,5 +65,13 @@ public class SensorViewController: NSViewController
     public override var nibName: NSNib.Name?
     {
         "SensorViewController"
+    }
+    
+    public override func viewDidLoad()
+    {
+        super.viewDidLoad()
+        
+        nameLabel.font = .monospacedDigitSystemFont(ofSize: NSFont.smallSystemFontSize, weight: .light)
+        valueLabel.font = .monospacedDigitSystemFont(ofSize: NSFont.smallSystemFontSize, weight: .regular)
     }
 }
